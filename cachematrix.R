@@ -1,90 +1,78 @@
-## Calculating the inverse of a matrix can be a computation intensive operation. 
-## functions do
+## Calculating the inverse of a matrix can be computation intensive. Once 
+## the inverse has been computed, we can eliminate repeating the calculation
+## by storing the inverse in a special matrix object that stores both the 
+## matrix and its inverse. 
 
-## Write a short comment describing this function
+## The makeCacheMatrix function below constructs a generalized matrix object
+## that stores both itself and its inverse. the inverse from the
+## generalized matrix object 
 
 makeCacheMatrix <- function(x = matrix()) {
 
+## The determinant of the matrix x must be not be equal to zero.
+## Otherwise, the inverse does not exist.
+        
+        inverseMatrix = NULL
+        
+        ## The following function can be accessed by the user to create a
+        ## generalized matrix object that the cacheSolve() function
+        ## can access to store and retrieve the matrix inverse once it has 
+        ## been calculated.
+        
+        setMatrix = function(y) {
+                
+                # Assign values to the generalized matrix object
+                # outside this global environment 
+                x <<- y
+                inverseMatrix = NULL                
+                }
+        
+        ## The generalized matrix object has three more special 
+        ## functions that the cacheSolve() function can access:
+        
+        ## 1. setMatrix - save the input matrix x in memory
+        ## 2. getMatrix - retrieve the matrix x from memory
+        ## 3. setInverse - save the inverse in memory
+        ## 4. getInverse - retrieve the inverse from memory if the 
+        ##                 inverse has already been calculated.
+        
+        getMatrix  = function() {x}
+        setInverse = function(inverse) {inverseMatrix <<- inverse} 
+        getInverse = function() {inverseMatrix}
+        
+        list(setMatrix  = setMatrix,  getMatrix  = getMatrix,
+             setInverse = setInverse, getInverse = getInverse)
 }
 
 
-## Write a short comment describing this function
+
+
+## The following function below computes the inverse of a matrix if it has not
+## already been calculated and stored within the generalized matrix object.
+## If the inverse has already been calculated, this function retrieves the
+## inverse matrix from cache memory using the getInverse function of the
+## generalized matrix object created by the makeCacheMatrix function above.
 
 cacheSolve <- function(x, ...) {
         ## Return a matrix that is the inverse of 'x'
-}
-
-
-
-
-##################
-## 
-## To eliminate the requirement
-## of performming the computation repeatedly, a special function
-## is included below that defines a "matrix" object that stores the
-## inverse matrix in cache  memory. 
-
-
-## This function creates a "matrix" object that can also store its 
-## own inverse in cache memory. This function is very similar to one
-## posted by Guangming Lang
-
-makeCacheMatrix <- function(x = matrix()) {
-        ##y <- x^{-1}
-        
-        ## The determinant of x must be not be equal to zero.
-        ## Otherwise, the inverse does not exist.
-        
-        ## This is a constructor function of a generalized matrix
-        ## object that returns a list of functions that enable the 
-        ## the cacheSolve() function to save and retrieve the inverse of
-        ## the matrix.
-        
-        ## The generalized matrix object has the following special 
-        ## functions: 
-        ##    1. setMatrix (save) the input matrix x
-        ##    2. getMatrix (retrieve) the matrix from memory
-        ##    3. setInverse (save) the inverse
-        ##    4. getInverse (retrieve) the inverse from memory
-        
-        inverseMatrix = NULL
-        setMatrix = function(y) {
-                # Assign values to an object in an outside environment 
-                x <<- y
-                ##inv <<- NULL
-        }
-        getMatrix = function() {x}
-        setInverse = function(inverse) {inverseMatrix <<- inverse} 
-        getInverse = function() {inverseMatrix}
-        list(setMatrix=setMatrix,     getMatrix=getMatrix,
-             setInverse=setInverse, getInverse=getInverse)
-}
-
-
-## This function computes the inverse of a matrix if it not alrready
-## calculated and included within the generalized matrix object above.
-## This function retrieves the inverse matrix from cache memory using the 
-## getInverse function of the generalized matrix object produc ed by the 
-## makeCacheMatrix function.
-
-cacheSolve <- function(x, ...) { 
-        ## Return inverse of matrix that was input to makeCacheMatrix()
-        ## x is the output of makeCacheMatrix()
-        
+                
         inverse <-  x$getInverse()
-        print("Here")
-        
+                
         # This statement retrieves the previously calculated inverse
         # if it has already been calculated.
-        if (is.null(inverse)){
-                #calculate the inverse
-                message("Computing the inverse. The computing time depends on the
-                         size of the matrix.")
-                matrix.data = x$getMatrix()
-                inv <<- solve(matrix.data, ...)
+        if (!is.null(inverse)){
+                message("getting cached data")
+                return(inverse)
+        }
                 
-                # save the inverse in the cache
-                x$setInverse(inv)
-        } 
+        #If inverse is null, calculate the inverse
+        message("Computing the inverse. The computing time depends on the
+                 size of the matrix.")
+        matrix.data = x$getMatrix()
+        inv <- solve(matrix.data, ...)
+                
+        # save the inverse in the cache
+        x$setInverse(inv)
+         
         inv
 }
